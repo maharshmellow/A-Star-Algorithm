@@ -22,7 +22,15 @@ class Grid:
             for j in range(self.height):
                 x = (i*self.nodeSize)+((i+1)*self.nodeGap)
                 y = (j*self.nodeSize)+((j+1)*self.nodeGap)
-                color = "white"
+
+                # color start and goal blocks differently
+                if (i+1, j+1) == self.start:
+                    color = "red"
+                elif (i+1, j+1) == self.goal:
+                    color = "green"
+                else:
+                    color = "white"
+
                 node = Node(x, y,self.nodeSize, self.window, color)
                 row.append(node)
                 node.draw()
