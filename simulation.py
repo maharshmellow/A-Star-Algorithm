@@ -13,8 +13,9 @@ class Grid:
         self.window = window
         self.nodes = []
 
-        self.start = (1, 1)
-        self.goal = (5, 5)
+        self.start = (13, 8)
+        self.goal = (17, 8)
+        self.blocks = [(15, 6), (15, 7), (15, 8), (15, 9), (15, 10)]
 
     def draw(self):
         for i in range(self.width):
@@ -28,6 +29,8 @@ class Grid:
                     color = "red"
                 elif (i+1, j+1) == self.goal:
                     color = "green"
+                elif (i+1, j+1) in self.blocks:
+                    color = "black"
                 else:
                     color = "white"
 
