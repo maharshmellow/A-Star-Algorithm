@@ -1,6 +1,6 @@
 from graphics import *
 import math
-import time
+import random
 
 class Grid:
     def __init__(self, width, height, nodeSize, nodeGap, window):
@@ -12,10 +12,13 @@ class Grid:
         self.nodeGap = nodeGap
         self.window = window
         self.nodes = []
+        self.start = (1, 50)
+        self.end = (300, 50)
+        self.blocks = []
 
-        self.start = (7, 8)
-        self.end = (17, 8)
-        self.blocks = [(7, 7), (8, 7), (8, 9), (9, 7), (9, 9), (10, 7), (10, 9), (11, 7), (11, 9), (12, 7), (12, 9), (13, 7), (13, 9), (13, 8)]
+        # could also just put coordinates in self.blocks instead of randomly generating them
+        for i in range(1000):
+            self.blocks.append((random.randrange(0, width), random.randrange(0, height)))
 
     def draw(self):
         for i in range(self.width):
@@ -39,9 +42,10 @@ class Grid:
                 node.draw()
 
             self.nodes.append(row)
+        # draw all the nodes at once
+        self.window.flush()
 
     def findPath(self):
-        startTime = time.time()
         startNode = self.nodes[self.start[0]-1][self.start[1]-1]
         endNode = self.nodes[self.end[0]-1][self.end[1]-1]
 
@@ -86,12 +90,9 @@ class Grid:
                 neighbour.setGScore(tempGScore)
                 neighbour.setFScore(tempGScore + self.getDistance(neighbour, endNode)) # fScore = gScore + hCost
 
-
         return False    # failure to find a path
 
-
     def getDistance(self, node, endNode):
-        """Gets the distance from the node to the end node - hCost in this case"""
         xDistance = node.column - endNode.column
         yDistance = node.row - endNode.row
 
@@ -99,9 +100,7 @@ class Grid:
 
         return(hCost)
 
-
     def getNeighbours(self, node):
-
         neighbours = []
         row = node.row
         column = node.column
@@ -117,14 +116,10 @@ class Grid:
 
     def reconstructPath(self, endNode):
         current = endNode
-
         while current.getParent():
             current.changeColor("yellow")
             current = current.getParent()
         endNode.changeColor("green")
-
-
-
 
 class Node:
     def __init__(self, x, y, size, window, color, row, column):
@@ -135,7 +130,6 @@ class Node:
         self.color = color
         self.row = row
         self.column = column
-
         self.parent = None
         self.fScore = math.inf
         self.gScore = math.inf
@@ -145,7 +139,6 @@ class Node:
         node.setFill(self.color)
         node.setOutline(self.color)
         node.draw(self.window)
-        self.window.flush()
 
     def setFScore(self, fScore):
         self.fScore = fScore
@@ -166,16 +159,14 @@ class Node:
         node.draw(self.window)
         self.window.flush()
 
-
 def main():
     # size in terms of # of nodes
-    gridWidth = 30
-    gridHeight = 15
+    gridWidth = 300
+    gridHeight = 100
     # size of each node in pixels
-    nodeSize = 30
+    nodeSize = 3
     # gap between each node in pixels
     gap = 2
-
     # subtracting 5px just makes it look nicer
     screenWidth = (gridWidth * nodeSize) + ((gridWidth + 1) * gap) - 5
     screenHeight = (gridHeight * nodeSize) + ((gridHeight + 1) * gap) - 5
@@ -187,10 +178,14 @@ def main():
 
     grid = Grid(gridWidth, gridHeight, nodeSize, gap, window)
     grid.draw()
+
     if grid.findPath():
         print("Path Successful")
+    else:
+        print("Path Not Found")
 
     # prevents the program from exiting
     while True:
-        mousePoint = window.checkMouse()
+        window.checkMouse()
+
 main()
