@@ -1,6 +1,6 @@
 from graphics import *
 import math
-
+import time
 
 class Grid:
     def __init__(self, width, height, nodeSize, nodeGap, window):
@@ -13,9 +13,9 @@ class Grid:
         self.window = window
         self.nodes = []
 
-        self.start = (14, 8)
+        self.start = (7, 8)
         self.end = (17, 8)
-        self.blocks = [(15, 6), (15, 7), (15, 8), (15, 9), (15, 10)]
+        self.blocks = [(7, 7), (8, 7), (8, 9), (9, 7), (9, 9), (10, 7), (10, 9), (11, 7), (11, 9), (12, 7), (12, 9), (13, 7), (13, 9), (13, 8)]
 
     def draw(self):
         for i in range(self.width):
@@ -41,6 +41,7 @@ class Grid:
             self.nodes.append(row)
 
     def findPath(self):
+        startTime = time.time()
         startNode = self.nodes[self.start[0]-1][self.start[1]-1]
         endNode = self.nodes[self.end[0]-1][self.end[1]-1]
 
@@ -56,6 +57,7 @@ class Grid:
         while self.opened:
             # current is an opened node with the lowest fScore
             current = self.opened[0]
+
             for node in self.opened:
                 if node.fScore < current.fScore:
                     current = node
@@ -63,41 +65,66 @@ class Grid:
             if current == endNode:
                 # found the path - display the path
                 self.reconstructPath(endNode)
+                return(True)
 
             self.opened.remove(current)
             self.closed.append(current)
 
-            self.getNeighbours(current)
+            for neighbour in self.getNeighbours(current):
+                if neighbour in self.closed:
+                    continue    # ignore it because it has already been evaluated
+
+                # the distance from start to a neighbour
+                tempGScore = current.gScore + self.getDistance(current, neighbour)
+                if neighbour not in self.opened:    # discover a new node
+                    self.opened.append(neighbour)
+                elif tempGScore >= neighbour.gScore:
+                    continue    # this is not a better path
+
+                # this path is the best path until now
+                neighbour.setParent(current)
+                neighbour.setGScore(tempGScore)
+                neighbour.setFScore(tempGScore + self.getDistance(neighbour, endNode)) # fScore = gScore + hCost
+
+
+        return False    # failure to find a path
 
 
     def getDistance(self, node, endNode):
         """Gets the distance from the node to the end node - hCost in this case"""
-        xDistance = node.row - endNode.row
-        yDistance = node.column = endNode.column
+        xDistance = node.column - endNode.column
+        yDistance = node.row - endNode.row
+
         hCost = math.sqrt((xDistance**2) + (yDistance**2))
 
         return(hCost)
 
 
     def getNeighbours(self, node):
-        
+
         neighbours = []
         row = node.row
         column = node.column
         adjacentCoordinates = [(row-1, column-1), (row-1, column), (row-1, column+1), (row, column-1), (row, column+1), (row+1, column - 1), (row+1, column), (row+1, column+1)]
 
         for coord in adjacentCoordinates:
-            if (coord[0]+1, coord[1]+1) not in self.blocks and coord[0] >= 0 and coord[0] <= self.height-1 and coord[1] >= 0 and coord[1] <= self.width-1:
+            if (coord[0]+1, coord[1]+1) not in self.blocks and coord[0] >= 0 and coord[0] <= self.width-1 and coord[1] >= 0 and coord[1] <= self.height-1:
                 # valid node
-                print(coord)
                 neighbours.append(self.nodes[coord[0]][coord[1]])
 
-        print(neighbours)
         return(neighbours)
 
 
     def reconstructPath(self, endNode):
-        pass
+        current = endNode
+
+        while current.getParent():
+            current.changeColor("yellow")
+            current = current.getParent()
+        endNode.changeColor("green")
+
+
+
 
 class Node:
     def __init__(self, x, y, size, window, color, row, column):
@@ -110,8 +137,8 @@ class Node:
         self.column = column
 
         self.parent = None
-        self.fScore = None
-        self.gScore = None
+        self.fScore = math.inf
+        self.gScore = math.inf
 
     def draw(self):
         node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
@@ -125,6 +152,19 @@ class Node:
 
     def setGScore(self, gScore):
         self.gScore = gScore
+
+    def setParent(self, parent):
+        self.parent = parent
+
+    def getParent(self):
+        return(self.parent)
+
+    def changeColor(self, newColor):
+        node = Rectangle(Point(self.x, self.y), Point(self.x + self.size, self.y + self.size))
+        node.setFill(newColor)
+        node.setOutline(newColor)
+        node.draw(self.window)
+        self.window.flush()
 
 
 def main():
@@ -147,7 +187,8 @@ def main():
 
     grid = Grid(gridWidth, gridHeight, nodeSize, gap, window)
     grid.draw()
-    grid.findPath()
+    if grid.findPath():
+        print("Path Successful")
 
     # prevents the program from exiting
     while True:
