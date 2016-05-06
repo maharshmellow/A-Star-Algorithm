@@ -1,2 +1,2 @@
-# A* Algorithm - Development Branch
+# A* Algorithm
 Python Simulation of the A* Algorithm
