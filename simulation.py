@@ -12,13 +12,15 @@ class Grid:
         self.nodeGap = nodeGap
         self.window = window
         self.nodes = []
-        self.start = (1, 50)
-        self.end = (300, 50)
+        self.start = (1, 5)
+        self.end = (30, 5)
         self.blocks = []
-
-        # could also just put coordinates in self.blocks instead of randomly generating them
-        for i in range(1000):
-            self.blocks.append((random.randrange(0, width), random.randrange(0, height)))
+        
+        self.blocks.append((30, 6))
+        self.blocks.append((30, 4))
+        self.blocks.append((29, 4))
+        self.blocks.append((29, 5))
+        self.blocks.append((29, 6))
 
     def draw(self):
         for i in range(self.width):
@@ -118,8 +120,10 @@ class Grid:
         current = endNode
         while current.getParent():
             current.changeColor("yellow")
+            self.window.flush()
             current = current.getParent()
         endNode.changeColor("green")
+        self.window.flush()
 
 class Node:
     def __init__(self, x, y, size, window, color, row, column):
@@ -157,14 +161,13 @@ class Node:
         node.setFill(newColor)
         node.setOutline(newColor)
         node.draw(self.window)
-        self.window.flush()
 
 def main():
     # size in terms of # of nodes
-    gridWidth = 300
+    gridWidth = 30
     gridHeight = 100
     # size of each node in pixels
-    nodeSize = 3
+    nodeSize = 10 
     # gap between each node in pixels
     gap = 2
     # subtracting 5px just makes it look nicer
@@ -183,7 +186,10 @@ def main():
         print("Path Successful")
     else:
         print("Path Not Found")
-
+        for row in grid.nodes:
+            for node in row:
+                node.changeColor("red")
+        window.flush()
     # prevents the program from exiting
     while True:
         window.checkMouse()
