@@ -15,12 +15,11 @@ class Grid:
         self.start = (1, 5)
         self.end = (30, 5)
         self.blocks = []
-        
-        self.blocks.append((30, 6))
-        self.blocks.append((30, 4))
-        self.blocks.append((29, 4))
-        self.blocks.append((29, 5))
-        self.blocks.append((29, 6))
+
+        self.blocks.append((28, 5))
+        self.blocks.append((20, 4))
+        self.blocks.append((20, 6))
+        self.blocks.append((3, 5))
 
     def draw(self):
         for i in range(self.width):
@@ -106,7 +105,8 @@ class Grid:
         neighbours = []
         row = node.row
         column = node.column
-        adjacentCoordinates = [(row-1, column-1), (row-1, column), (row-1, column+1), (row, column-1), (row, column+1), (row+1, column - 1), (row+1, column), (row+1, column+1)]
+        # add corners if the path can go diagonally
+        adjacentCoordinates = [(row-1, column), (row, column-1), (row, column+1), (row+1, column)]
 
         for coord in adjacentCoordinates:
             if (coord[0]+1, coord[1]+1) not in self.blocks and coord[0] >= 0 and coord[0] <= self.width-1 and coord[1] >= 0 and coord[1] <= self.height-1:
@@ -165,9 +165,9 @@ class Node:
 def main():
     # size in terms of # of nodes
     gridWidth = 30
-    gridHeight = 100
+    gridHeight = 10
     # size of each node in pixels
-    nodeSize = 10 
+    nodeSize = 30
     # gap between each node in pixels
     gap = 2
     # subtracting 5px just makes it look nicer
